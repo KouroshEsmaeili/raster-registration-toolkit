@@ -6,11 +6,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# Rasterio requires libexpat at runtime on the slim Debian image.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libexpat1 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY pyproject.toml README.md ./
 COPY src ./src
 
-RUN python -m pip install --no-cache-dir --upgrade pip \
-    && python -m pip install --no-cache-dir . \
+RUN python -m pip install --no-cache-dir . \
     && groupadd --gid 1000 rasterreg \
     && useradd --uid 1000 --gid rasterreg --create-home \
         --shell /usr/sbin/nologin rasterreg \
@@ -18,6 +23,7 @@ RUN python -m pip install --no-cache-dir --upgrade pip \
     && chown rasterreg:rasterreg /data
 
 USER rasterreg
+
 WORKDIR /data
 
 ENTRYPOINT ["rasterreg"]
