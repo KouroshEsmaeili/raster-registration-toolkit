@@ -7,10 +7,10 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True, slots=True)
 class RegistrationConfig:
-    """Tunable values retained from the historical implementation.
+    """Configuration for feature-based raster registration.
 
-    The defaults preserve the latest implementation's matching thresholds,
-    pyramid limits, deterministic OpenCV seed, and 180-degree source rotation.
+    The defaults define matching thresholds, pyramid limits, a deterministic
+    OpenCV seed, and source orientation.
     Applications can override them for different sensors and scene types.
     """
 

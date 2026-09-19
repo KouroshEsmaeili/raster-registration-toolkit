@@ -1,4 +1,4 @@
-"""Automatic affine georeferencing of overlapping raster imagery."""
+"""Raster registration and RPC/DEM orthorectification toolkit."""
 
 from .config import RegistrationConfig
 from .exceptions import (

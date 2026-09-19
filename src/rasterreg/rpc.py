@@ -156,7 +156,7 @@ class RPCDocument:
 
 
 def parse_rpc_xml(path: str | Path) -> RPCDocument:
-    """Parse an RPB/IMAGE XML file used by the historical satellite workflow."""
+    """Parse RPC metadata from an RPB/IMAGE XML document."""
     xml_path = Path(path).expanduser()
     if not xml_path.is_file():
         raise RPCMetadataError(f"RPC XML does not exist or is not a file: {xml_path}")

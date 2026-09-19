@@ -3,7 +3,7 @@ import pytest
 from rasterreg.config import RegistrationConfig
 
 
-def test_default_configuration_preserves_historical_rotation_and_ratio() -> None:
+def test_default_configuration_uses_expected_rotation_and_ratio() -> None:
     config = RegistrationConfig()
 
     assert config.source_rotation_degrees == 180

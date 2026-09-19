@@ -80,9 +80,9 @@ def match_descriptors(
 ) -> list[cv2.DMatch]:
     """Apply two-nearest-neighbor matching, Lowe ratio filtering, and trimming.
 
-    The percentile trimming is retained from the legacy v3 implementation. It discards both the
-    closest and most distant ratio-filtered matches and therefore warrants
-    validation on representative data before changing its defaults.
+    Percentile trimming discards both the closest and most distant
+    ratio-filtered matches and should be validated on representative data when
+    tuning its defaults.
     """
     matcher = cv2.BFMatcher(cv2.NORM_L2, crossCheck=False)
     neighbor_pairs = matcher.knnMatch(source_descriptors, reference_descriptors, k=2)
@@ -144,12 +144,11 @@ def scale_affine_to_full_resolution(
     reference_levels: int,
     reference_shape: tuple[int, ...],
 ) -> tuple[NDArray[np.float64], tuple[int, int]]:
-    """Map the historical pyramid-space affine transform to its output grid.
+    """Map a pyramid-space affine transform to the full-resolution output grid.
 
-    The legacy workflow expressed the output grid at the source pyramid's pixel scale. As a
-    result, matrix translation is divided by the source scale while the output
-    dimensions are multiplied by ``reference_scale / source_scale``. This is
-    retained as the package's explicit full-resolution coordinate convention.
+    The output grid uses the source pyramid's effective pixel scale. Translation
+    is converted back to full-resolution source coordinates, while output
+    dimensions account for the relative source and reference pyramid scales.
     """
     source_scale = 1.0 / (2**source_levels)
     reference_scale = 1.0 / (2**reference_levels)
@@ -168,7 +167,7 @@ def register_images(
     reference_feature_image: ImageArray,
     config: RegistrationConfig,
 ) -> AlignmentResult:
-    """Register source imagery to reference imagery using the retained feature method."""
+    """Register source imagery to reference imagery using SIFT and RANSAC."""
     cv2.setRNGSeed(config.seed)
     source_levels = pyramid_levels(source_feature_image.shape[0], config.source_max_height)
     reference_levels = pyramid_levels(reference_feature_image.shape[0], config.reference_max_height)

@@ -13,7 +13,6 @@ build
 dist
 *.egg-info
 data
-BaseMap
 outputs
 *.log
 .env

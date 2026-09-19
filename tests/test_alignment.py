@@ -9,7 +9,7 @@ def test_pyramid_levels_halves_until_height_is_within_limit() -> None:
     assert pyramid_levels(40_001, 5_000) == 3
 
 
-def test_full_resolution_scaling_preserves_historical_coordinate_convention() -> None:
+def test_full_resolution_scaling_uses_source_scale_coordinate_convention() -> None:
     downscaled = np.array([[1.1, 0.2, 12.0], [-0.1, 0.9, -8.0]])
 
     matrix, output_size = scale_affine_to_full_resolution(

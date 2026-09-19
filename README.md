@@ -5,11 +5,9 @@ rasters and terrain-aware orthorectification of satellite scenes with RPC
 metadata and a user-supplied DEM. Both workflows produce portable GeoTIFF
 outputs without provider-specific services.
 
-The project began as a desktop workflow for registering high-resolution,
-multiband aerial imagery—including a fourth infrared band—against lower
-resolution basemap imagery. This repository consolidates that historical code
-into one typed Python package, a command-line interface, and an optional
-dual-workflow GUI.
+The toolkit supports high-resolution and multiband imagery, including optional
+additional bands such as infrared data. It provides a typed Python API,
+command-line interface, and optional dual-workflow desktop GUI.
 
 ## Method
 
@@ -38,10 +36,10 @@ source image + user-supplied reference raster
        reference bounds and CRS → GeoTIFF
 ```
 
-The default thresholds preserve the latest historical implementation: a 0.8
-descriptor ratio, 20th–80th percentile distance trimming, source/reference
-pyramid height limits of 5,000/10,000 pixels, and a 180-degree source rotation.
-They are configurable through `RegistrationConfig` in the Python API.
+The default configuration uses a 0.8 descriptor ratio, 20th–80th percentile
+distance trimming, source/reference pyramid height limits of 5,000/10,000
+pixels, and a 180-degree source rotation. These values are configurable through
+`RegistrationConfig`.
 
 ## Architecture
 
@@ -55,7 +53,7 @@ They are configurable through `RegistrationConfig` in the Python API.
   metadata and GDAL-backed terrain-correction layer.
 - `scene.py`, `satellite.py`, and `reporting.py` discover inputs, coordinate the
   satellite workflow, and write JSON/GeoJSON reports.
-- `config.py` holds the historically derived registration defaults.
+- `config.py` holds configurable registration defaults.
 - `cli.py` and `app/gui.py` are thin application boundaries around the same
   pipeline.
 
@@ -97,8 +95,8 @@ python -m rasterreg register \
   --verbose
 ```
 
-The historical workflow rotated source imagery by 180 degrees. Override that
-only when the source orientation is known:
+The default configuration rotates source imagery by 180 degrees. Override this
+when the source orientation is known:
 
 ```bash
 python -m rasterreg register \
@@ -112,8 +110,7 @@ python -m rasterreg register \
 Existing outputs are protected by default. Pass `--overwrite` to replace one;
 the source and reference paths can never be used as the output path.
 
-The original flat registration form (`rasterreg --source ...`) remains
-supported. Process a satellite scene with external RPC XML and a DEM using:
+The flat registration form (`rasterreg --source ...`) remains supported. Process a satellite scene with external RPC XML and a DEM using:
 
 ```bash
 python -m rasterreg scene \
@@ -208,22 +205,23 @@ The reference raster must additionally contain a non-identity, north-up affine
 transform and a CRS. Rotated or sheared reference rasters are rejected because
 the current output grid is reconstructed from axis-aligned reference bounds.
 The source does not need geospatial metadata. All source bands are warped
-together, preserving the fourth band used as infrared data by the historical
-workflow. `--add-alpha` adds a separate validity mask; otherwise
+together, including a fourth band when used for infrared data. `--add-alpha`
+adds a separate validity mask; otherwise
 out-of-footprint warp pixels are zero.
 
-For satellite processing, the primary TIFF needs a matching RPB/IMAGE RPC XML.
-Terrain correction needs a georeferenced numeric DEM covering the nominal RPC
-scene center. Automatic discovery rejects unresolved ambiguity.
+For satellite processing, the primary TIFF currently needs compatible
+RPB/IMAGE RPC XML metadata. Internally, RPC coefficients are represented by a
+provider-neutral model, so additional metadata adapters can be added without
+changing the orthorectification layer. Terrain correction needs a georeferenced
+numeric DEM covering the nominal RPC scene center. Automatic discovery rejects
+unresolved ambiguity.
 
 ## Data and imagery rights
 
-The original high-resolution imagery, lower-resolution imagery, local basemap,
-and cached map tiles are not included. The active application performs no tile
-downloads and does not depend on Google imagery or a provider-specific cache.
-Users must supply imagery and elevation data that they are legally permitted to
-use and distribute. Review the rights of every documentation image before
-publishing a fork.
+No imagery, basemap tiles, DEM data, or third-party assets are bundled with
+this repository. The application performs no tile downloads and does not depend
+on a provider-specific imagery cache. Users must supply imagery and elevation
+data that they are legally permitted to use and distribute.
 
 ## Validation scope
 

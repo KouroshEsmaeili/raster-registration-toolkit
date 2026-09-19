@@ -26,7 +26,7 @@ class PipelineResult:
 
 
 def _rotate_quarter_turns(image, degrees: int):
-    """Rotate without interpolation, matching the historical expanded rotation."""
+    """Rotate by quarter turns without interpolation."""
     rotations = {
         0: None,
         90: cv2.ROTATE_90_COUNTERCLOCKWISE,

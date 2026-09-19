@@ -19,7 +19,6 @@ dist/
 Thumbs.db
 
 # Local data and generated raster output
-BaseMap/
 data/
 outputs/
 *.aux.xml

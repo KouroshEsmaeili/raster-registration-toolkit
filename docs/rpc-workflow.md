@@ -1,8 +1,12 @@
 # RPC/DEM satellite workflow
 
-The satellite workflow converts a scene raster carrying separate rational
-polynomial coefficient (RPC) metadata into a georeferenced GeoTIFF. It is
-provider-neutral: users supply the scene directory, RPC XML and, when terrain
+The satellite workflow converts a scene raster with rational polynomial
+coefficient (RPC) metadata into a georeferenced GeoTIFF.
+
+The processing layer uses a provider-neutral internal RPC model. The current
+metadata adapter parses RPB/IMAGE XML documents; additional vendor formats can
+be added by translating their metadata into the same internal RPC model.
+Users supply the scene imagery, compatible RPC metadata, and, when terrain
 correction is enabled, an elevation raster.
 
 ## Processing stages
@@ -15,8 +19,9 @@ correction is enabled, an elevation raster.
 5. Optionally register the orthorectified result against a user-supplied
    georeferenced reference raster using the existing SIFT/RANSAC pipeline.
 6. Write `registered.tif`, `metadata.json`, and a WGS84
-   `footprint.geojson`. A separately described panchromatic image is processed
-   only when it has its own RPC XML.
+   `footprint.geojson` representing the output raster bounds.
+7. Process a separately described panchromatic image only when it has its own
+   RPC XML.
 
 Install GDAL Python bindings compatible with the GDAL library on the host, then
 install the satellite extra where appropriate:
@@ -39,24 +44,26 @@ Feature refinement is opt-in and requires `--reference` together with
 `--refine`. The registration method is affine and therefore does not model
 arbitrary terrain or sensor distortions.
 
-## Migration decisions
+## Design decisions
 
-The legacy archive was treated as read-only reference material. The migration
-retains RPB parsing, DEM-backed RPC warping, panchromatic handling, scene
-discovery, and progress reporting. It intentionally excludes provider-specific
-tile downloads, machine-specific paths, regional coordinate clamps, fixed
-translation biases, and unsupported accuracy claims. Experimental duplicate
-feature-matching and phase-correlation scripts were not promoted over the
-tested registration engine already in this package.
+Scene discovery, RPC metadata parsing, DEM-backed RPC warping, optional
+panchromatic processing, feature refinement, and machine-readable reporting are
+kept as separate components. The implementation avoids provider-specific tile
+services, machine-specific paths, fixed translation biases, regional coordinate
+assumptions, and hard-coded accuracy claims.
 
-The legacy variants used conflicting rules for expanding a downsampled affine
-matrix to full resolution. The existing package convention remains unchanged:
-coordinates are scaled according to the source and reference pyramid levels,
-as covered by deterministic unit tests.
+Feature refinement uses the same explicit pyramid-coordinate convention as the
+primary registration workflow, with deterministic unit tests covering the scale
+conversion.
 
 ## Validation scope
 
-Unit tests validate parsing, selection, coordinate handling, error paths, and
-other deterministic components. Actual positional accuracy depends on sensor
-metadata, DEM quality, reference imagery, and GDAL configuration and must be
-measured with independent ground control for each operational dataset.
+Unit tests cover RPC parsing, scene selection, DEM validation, coordinate
+handling, output-resolution calculations, error paths, and other deterministic
+components. CI does not perform an end-to-end RPC orthorectification against
+real satellite imagery and a real DEM.
+
+Actual positional accuracy depends on sensor metadata, DEM quality, reference
+imagery, GDAL configuration, and scene characteristics. Quantitative accuracy
+must therefore be evaluated against independent ground control on representative
+datasets.

@@ -1,12 +1,11 @@
 # Methodology
 
-## Scope and provenance
+## Scope
 
 Raster Registration Toolkit applies established local-feature registration to
-geospatial raster export.
-The active implementation was conservatively extracted from the historical
-`AGR_ver3.0` workflow. Provider-specific basemap assembly, GUI callbacks, and
-file IO are no longer mixed with the registration functions.
+geospatial raster export. Feature extraction, matching, affine estimation,
+raster IO, geospatial metadata, configuration, and application interfaces are
+implemented as separate reusable components.
 
 ## Feature images and multiband data
 
@@ -14,19 +13,19 @@ Rasterio loads every source band into a height × width × bands array. The firs
 three bands are independently percentile-normalized to 8-bit only for feature
 detection. This prevents a 16-bit source from being truncated while leaving the
 original values untouched for final warping. For grayscale inputs, the sole
-band is normalized directly. Additional source bands, including the historical
-fourth infrared band, bypass feature extraction but receive the same final
-affine transform.
+band is normalized directly. Additional source bands, including a fourth
+infrared band, bypass feature extraction but receive the same final affine
+transform.
 
-By default the source is rotated 180 degrees before both matching and warping,
-as in the latest historical application. The CLI permits 0, 90, 180, or 270
-degree counter-clockwise rotations without interpolation.
+By default the source is rotated 180 degrees before both matching and warping.
+The CLI permits 0, 90, 180, or 270 degree counter-clockwise rotations without
+interpolation.
 
 ## Image pyramids
 
 Large source and reference feature images are repeatedly reduced using
-OpenCV's Gaussian `pyrDown` operation. The historical maximum heights are
-5,000 source pixels and 10,000 reference pixels. If an image uses `l` pyramid
+OpenCV's Gaussian `pyrDown` operation. The default maximum heights are 5,000
+source pixels and 10,000 reference pixels. If an image uses `l` pyramid
 levels, its coordinate scale is
 
 ```text
@@ -53,10 +52,9 @@ distance(m) < 0.8 × distance(n).
 ```
 
 The implementation then retains matches strictly between the 20th and 80th
-percentiles of the accepted match distances. This second filter is preserved
-from the legacy v3 implementation; it removes both very low- and high-distance
-matches and remains a
-tunable heuristic for imagery with different feature distributions.
+percentiles of the accepted match distances. This configurable heuristic
+removes both very low- and high-distance matches and may require tuning for
+imagery with different feature distributions.
 
 ## Affine model and RANSAC
 
@@ -76,10 +74,9 @@ result records both the post-filter match count and RANSAC inlier count.
 
 ## Mapping to the full-resolution canvas
 
-Let `s_source` and `s_reference` be the pyramid scales. The historical workflow
-expressed its output canvas at the source pyramid's effective scale. It kept
-the affine matrix's 2 × 2 linear component, divided translation by
-`s_source`, and used canvas dimensions
+Let `s_source` and `s_reference` be the pyramid scales. The output coordinate
+convention keeps the affine matrix's 2 × 2 linear component, divides
+translation by `s_source`, and uses canvas dimensions
 
 ```text
 reference dimensions × (s_reference / s_source).
@@ -89,12 +86,9 @@ That convention is isolated in `scale_affine_to_full_resolution` and covered by
 a deterministic unit test, making the coordinate behavior explicit and
 maintainable.
 
-The legacy v3 implementation also computed extra zero padding from
-minimum-area rectangles around
-nonzero warped pixels. Its scale relationship and geospatial meaning were
-ambiguous, and downstream code assigned the same geographic bounds after
-padding. The active pipeline omits that ad hoc padding so the output canvas and
-its geographic bounds retain a direct relationship.
+The pipeline does not add geometry-derived padding after warping. The output
+canvas therefore retains a direct relationship with the geographic bounds
+assigned to the output raster.
 
 ## Raster georeferencing
 
@@ -114,8 +108,7 @@ y_resolution = (bottom - top) / output_height
 
 with the origin at `(left, top)`. This retains the north-up negative y pixel
 size produced by Rasterio's `from_bounds`. The CRS is copied from the reference
-raster rather than hard-coded to EPSG:4326, correcting a machine/data-specific
-assumption in the old application.
+raster rather than being hard-coded to a specific CRS.
 
 ## GeoTIFF and multiband preservation
 
