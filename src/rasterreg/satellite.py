@@ -9,6 +9,7 @@ from typing import Any
 
 from .config import RegistrationConfig
 from .dem import validate_dem, validate_dem_for_rpc
+from .exceptions import GeoreferencerError
 from .orthorectification import OrthorectificationConfig, orthorectify_rpc
 from .pipeline import PipelineResult, georeference
 from .reporting import write_footprint_geojson, write_metadata_report
@@ -178,7 +179,7 @@ def process_satellite_batch(
                 config=config,
                 status=status,
             )
-        except (OSError, ValueError) as exc:
+        except (GeoreferencerError, OSError, ValueError) as exc:
             _emit(status, f"Scene failed: {scene_directory.name}: {exc}")
             items.append(BatchSceneResult(scene_directory, error=str(exc)))
         else:
