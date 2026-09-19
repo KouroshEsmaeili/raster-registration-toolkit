@@ -110,7 +110,10 @@ python -m rasterreg register \
 Existing outputs are protected by default. Pass `--overwrite` to replace one;
 the source and reference paths can never be used as the output path.
 
-The flat registration form (`rasterreg --source ...`) remains supported. Process a satellite scene with external RPC XML and a DEM using:
+The flat registration form (`rasterreg --source ...`) remains supported for
+compatibility.
+
+Process a satellite scene with RPC metadata and a DEM using:
 
 ```bash
 python -m rasterreg scene \
@@ -145,6 +148,7 @@ directory and mount it into the container:
 docker run --rm \
   -v "$(pwd)/data:/data" \
   raster-registration-toolkit \
+  register \
   --source /data/source.tif \
   --reference /data/reference.tif \
   --output /data/registered.tif
@@ -156,6 +160,7 @@ The equivalent PowerShell command is:
 docker run --rm `
   -v "${PWD}/data:/data" `
   raster-registration-toolkit `
+  register `
   --source /data/source.tif `
   --reference /data/reference.tif `
   --output /data/registered.tif
@@ -258,5 +263,5 @@ python -m compileall -q src app tests
 For quantitative accuracy assessment, compare registered outputs against
 independent ground-control points appropriate to the target dataset.
 
-GitHub Actions runs these engineering checks on Python 3.10, 3.11, and 3.12 for
-pushes to `main` and `refactor/**` branches and for pull requests.
+GitHub Actions runs these engineering checks on Python 3.10, 3.11, and 3.12
+for pushes to `main` and for pull requests.

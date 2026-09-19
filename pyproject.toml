@@ -5,9 +5,19 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "raster-registration-toolkit"
 version = "0.1.0"
-description = "Tools for raster registration and RPC/DEM orthorectification"
+description = "Feature-based raster registration and RPC/DEM orthorectification"
 readme = "README.md"
 requires-python = ">=3.10"
+authors = [
+    { name = "Kourosh Esmaeili" },
+]
+keywords = [
+    "computer-vision",
+    "image-registration",
+    "georeferencing",
+    "remote-sensing",
+    "raster",
+]
 dependencies = [
     "numpy>=1.24",
     "opencv-python-headless>=4.8",
@@ -24,6 +34,9 @@ dev = [
 
 [project.scripts]
 rasterreg = "rasterreg.cli:main"
+
+[project.urls]
+Repository = "https://github.com/KouroshEsmaeili/raster-registration-toolkit"
 
 [tool.setuptools.packages.find]
 where = ["src"]
