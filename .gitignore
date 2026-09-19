@@ -1,0 +1,32 @@
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environments and packaging output
+.venv/
+venv/
+build/
+dist/
+*.egg-info/
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local data and generated raster output
+BaseMap/
+data/
+outputs/
+*.aux.xml
+*.ovr
+
+# Logs and local environment settings
+*.log
+.env
+.env.*
+!.env.example
